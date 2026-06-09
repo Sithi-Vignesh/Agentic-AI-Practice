@@ -2,6 +2,14 @@ from langchain_ollama import ChatOllama
 from langgraph.prebuilt import create_react_agent
 from langchain_core.tools import tool
 
+
+student_db = {
+    "24BAI0149" : {"Name": "Sithi Vignesh", "ID": "24BAI0149", "Branch": "CSE AI/ML", "Year of Passing": 2028},
+    "24BAI0141" : {"Name": "Nithin Balaji", "ID": "24BAI0141", "Branch": "CSE AI/ML", "Year of Passing": 2028},
+    "24BAI0110" : {"Name": "Logith Aadhithiya", "ID": "24BAI0110", "Branch": "CSE AI/ML", "Year of Passing": 2028},
+    "24BDS0345" : {"Name": "Harshath", "ID": "24BDS0345", "Branch": "CSE Data Science", "Year of Passing": 2028}
+}
+
 @tool
 def libraryFineCalculator(days: int) -> int:
     '''Calculates the fine amount for returning a library book late. input is the number of delay days'''
@@ -42,19 +50,28 @@ def resultCalculator(a: int,b: int,c: int,d: int,e: int) -> dict:
     ans = {"average":avg, "grade":grade, "status":status}
     return ans
 
+@tool
+def studentInformationFinder(student_id: str) -> str:
+    '''Retreives the student's information based on the student ID. the input will be the student ID'''
+    if student_id in student_db:
+        student  = student_db[student_id]
+        ans = f"Name: {student['Name']}, ID: {student['ID']}, Branch: {student['Branch']}, Year of Passing: {student['Year of Passing']}"
+        return ans
+    else : return ("Student info not in Database")
+
 
 llm = ChatOllama(model = "qwen2.5:3b")
 
-tools = [libraryFineCalculator,feeBalance,hostelFeeCalculator,attendenceCalculator,resultCalculator]
+tools = [libraryFineCalculator,feeBalance,hostelFeeCalculator,attendenceCalculator,resultCalculator,studentInformationFinder]
 
 agent = create_react_agent(llm, tools)
 
-print("----------------------------------------------------")
-print("Hello, Welcome to Smart College Assitant!")
-print("Press Ctrl + C or type Stop to terminate the Chat")
-print("----------------------------------------------------")
+print("\n----------------------------------------------------")
+print("Heloo, Welcome to Smart College Assitant!")
+print("Press Ctrl + C or type 'Stop' to end the Chat")
+print("----------------------------------------------------\n")
 while True:
     user_input = input("You: ")
     if user_input.lower() == "stop" : break
     response = agent.invoke({"messages": [("human", user_input)]})
-    print("AI: " + response["messages"][-1].content)
+    print("AI: " + response["messages"][-1].content + "\n")
